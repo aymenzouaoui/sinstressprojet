@@ -1,11 +1,12 @@
 import 'dart:io';
-
+import 'package:client/screens/sinistre/mapScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+
 
 class SinistreFormScreen extends StatefulWidget {
   const SinistreFormScreen({super.key});
@@ -248,6 +249,18 @@ class _SinistreFormScreenState extends State<SinistreFormScreen> {
                       },
                     ),
                   ),
+                const SizedBox(height: 16),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => MapScreen()),
+                      );
+                    },
+                    child: Text('Select Location'),
+                  ),
+                ),
                 const SizedBox(height: 24),
                 Center(
                   child: _isLoading

@@ -45,7 +45,7 @@ class NotificationApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
-      home: SuiviScreen(), // Set SinistreFormScreen as the initial screen
+      home: SinistreFormScreen(), // Set SinistreFormScreen as the initial screen
       routes: {
         '/suivi': (context) => SuiviScreen(),
         '/sinistre_form': (context) => SinistreFormScreen(),
