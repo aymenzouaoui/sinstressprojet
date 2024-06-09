@@ -1,119 +1,152 @@
 import 'package:flutter/material.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this); // Adjust the length based on the number of tabs
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Profile', style: TextStyle(color: Colors.black)),
-        centerTitle: true,
+        backgroundColor: Colors.blue,
+        title: const Text('Profile'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Personal Info'),
+            Tab(text: 'Loyalty Points'),
+            Tab(text: 'Settings'),
+          ],
+        ),
       ),
-      body: Column(
+      body: TabBarView(
+        controller: _tabController,
         children: [
-          Container(
-            color: Colors.orangeAccent,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: NetworkImage('https://via.placeholder.com/150'), // Replace with actual image URL
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Farshad Roshan',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const Text(
-                    '+31611133458',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView(
+          PersonalInfoTab(),
+          LoyaltyPointsTab(),
+          SettingsTab(),
+        ],
+      ),
+    );
+  }
+}
+
+class PersonalInfoTab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          color: Colors.orangeAccent,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
               children: [
-                ProfileMenuItem(
-                  icon: Icons.edit,
-                  text: 'Edit Personal Info',
-                  onTap: () {},
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: NetworkImage('https://via.placeholder.com/150'), // Replace with actual image URL
                 ),
-                ProfileMenuItem(
-                  icon: Icons.star,
-                  text: 'Loyalty Points',
-                  trailing: const Text('126', style: TextStyle(fontSize: 16, color: Colors.black)),
-                  onTap: () {},
+                const SizedBox(height: 10),
+                const Text(
+                  'Farshad Roshan',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
-                ProfileMenuItem(
-                  icon: Icons.notifications,
-                  text: 'Notification Preferences',
-                  onTap: () {},
-                ),
-                ProfileMenuItem(
-                  icon: Icons.support,
-                  text: 'Support',
-                  onTap: () {},
-                ),
-                ProfileMenuItem(
-                  icon: Icons.article,
-                  text: 'Term & Conditions',
-                  onTap: () {},
-                ),
-                ProfileMenuItem(
-                  icon: Icons.info,
-                  text: 'About',
-                  onTap: () {},
-                ),
-                ProfileMenuItem(
-                  icon: Icons.logout,
-                  text: 'Log Out',
-                  onTap: () {},
+                const Text(
+                  '+31611133458',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+        ),
+        Expanded(
+          child: ListView(
+            children: [
+              ProfileMenuItem(
+                icon: Icons.edit,
+                text: 'Edit Personal Info',
+                onTap: () {},
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: 3, // Profile tab selected
-        selectedItemColor: Colors.blue,
-        onTap: (index) {
-          // Handle bottom navigation tap
-        },
-      ),
+        ),
+      ],
+    );
+  }
+}
+
+class LoyaltyPointsTab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        ProfileMenuItem(
+          icon: Icons.star,
+          text: 'Loyalty Points',
+          trailing: const Text('126', style: TextStyle(fontSize: 16, color: Colors.black)),
+          onTap: () {},
+        ),
+      ],
+    );
+  }
+}
+
+class SettingsTab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        ProfileMenuItem(
+          icon: Icons.notifications,
+          text: 'Notification Preferences',
+          onTap: () {},
+        ),
+        ProfileMenuItem(
+          icon: Icons.support,
+          text: 'Support',
+          onTap: () {},
+        ),
+        ProfileMenuItem(
+          icon: Icons.article,
+          text: 'Term & Conditions',
+          onTap: () {},
+        ),
+        ProfileMenuItem(
+          icon: Icons.info,
+          text: 'About',
+          onTap: () {},
+        ),
+        ProfileMenuItem(
+          icon: Icons.logout,
+          text: 'Log Out',
+          onTap: () {},
+        ),
+      ],
     );
   }
 }
