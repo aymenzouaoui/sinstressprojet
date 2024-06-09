@@ -53,6 +53,7 @@ class _MapScreenState extends State<MapScreen> {
           content: Text('Address: $address'),
         ),
       );
+      Navigator.pop(context, address); // Return the address to the previous screen
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -84,54 +85,58 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         title: Text('Interactive Map'),
         centerTitle: true,
-        backgroundColor: Colors.teal,
+        backgroundColor: Color(0xFF0866FF),
         leading: Icon(Icons.map),
       ),
-      body: Stack(
-        children: [
-          if (_loading)
-            Center(child: CircularProgressIndicator())
-          else
-            FlutterMap(
-              mapController: _mapController,
-              options: MapOptions(
-                center: _initialLocation,
-                zoom: _currentZoom,
-                onTap: _onTap,
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  subdomains: ['a', 'b', 'c'],
-                ),
-                if (_currentMarker != null)
-                  MarkerLayer(
-                    markers: [_currentMarker!],
+      body: Builder(
+        builder: (context) {
+          return Stack(
+            children: [
+              if (_loading)
+                Center(child: CircularProgressIndicator())
+              else
+                FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    center: _initialLocation,
+                    zoom: _currentZoom,
+                    onTap: _onTap,
                   ),
-              ],
-            ),
-          Positioned(
-            top: 10,
-            right: 10,
-            child: Column(
-              children: [
-                FloatingActionButton(
-                  mini: true,
-                  backgroundColor: Colors.teal,
-                  child: Icon(Icons.zoom_in),
-                  onPressed: _onZoomIn,
+                  children: [
+                    TileLayer(
+                      urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      subdomains: ['a', 'b', 'c'],
+                    ),
+                    if (_currentMarker != null)
+                      MarkerLayer(
+                        markers: [_currentMarker!],
+                      ),
+                  ],
                 ),
-                SizedBox(height: 8),
-                FloatingActionButton(
-                  mini: true,
-                  backgroundColor: Colors.teal,
-                  child: Icon(Icons.zoom_out),
-                  onPressed: _onZoomOut,
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Column(
+                  children: [
+                    FloatingActionButton(
+                      mini: true,
+                      backgroundColor: Color(0xFF0866FF),
+                      child: Icon(Icons.zoom_in),
+                      onPressed: _onZoomIn,
+                    ),
+                    SizedBox(height: 8),
+                    FloatingActionButton(
+                      mini: true,
+                      backgroundColor: Color(0xFF0866FF),
+                      child: Icon(Icons.zoom_out),
+                      onPressed: _onZoomOut,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
