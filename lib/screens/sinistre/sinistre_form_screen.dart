@@ -1,12 +1,12 @@
 import 'dart:io';
-import 'package:client/screens/sinistre/mapScreen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-
+import 'mapScreen.dart'; // Import MapScreen
 
 class SinistreFormScreen extends StatefulWidget {
   const SinistreFormScreen({super.key});
@@ -24,6 +24,7 @@ class _SinistreFormScreenState extends State<SinistreFormScreen> {
   List<File> _selectedImages = [];
   final ImagePicker _picker = ImagePicker();
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  String _selectedAddress = 'No address selected';
 
   @override
   void initState() {
@@ -118,6 +119,19 @@ class _SinistreFormScreenState extends State<SinistreFormScreen> {
     if (pickedDate != null && pickedDate != _incidentDate) {
       setState(() {
         _incidentDate = pickedDate;
+      });
+    }
+  }
+
+  Future<void> _navigateToMapScreen(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MapScreen()),
+    );
+
+    if (result != null && result is String) {
+      setState(() {
+        _selectedAddress = result;
       });
     }
   }
@@ -250,15 +264,19 @@ class _SinistreFormScreenState extends State<SinistreFormScreen> {
                     ),
                   ),
                 const SizedBox(height: 16),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => MapScreen()),
-                      );
-                    },
-                    child: Text('Select Location'),
+                const Text(
+                  'Address',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () => _navigateToMapScreen(context),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Select Address',
+                    ),
+                    child: Text(_selectedAddress),
                   ),
                 ),
                 const SizedBox(height: 24),
