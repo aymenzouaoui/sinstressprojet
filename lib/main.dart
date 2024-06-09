@@ -1,29 +1,39 @@
+// lib/main.dart
+
+import 'dart:io';
+import 'package:client/screens/profile/ProfileScreen.dart';
 import 'package:flutter/material.dart';
-import 'package:client/screens/sinistre/suivi_screen.dart';
-import 'package:client/screens/sinistre/sinistre_form_screen.dart';
-import 'package:client/screens/sinistre/sinistre_detail_screen.dart'; // Import SinistreDetailScreen
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+import 'package:client/screens/auth/login_screen.dart';
+import 'package:client/screens/sinistre/suivi_screen.dart';
+import 'package:client/screens/sinistre/sinistre_form_screen.dart';
+import 'package:client/screens/home_screen.dart';
+import 'bottom_nav_bar.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides();
   await _initializeNotifications();
   runApp(NotificationApp());
 }
 
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 Future<void> _initializeNotifications() async {
-  const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-  const InitializationSettings initializationSettings =
-      InitializationSettings(android: initializationSettingsAndroid);
-  await flutterLocalNotificationsPlugin.initialize(
-    initializationSettings,
-    onSelectNotification: _onSelectNotification,
-  );
+  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings, onSelectNotification: _onSelectNotification);
   tz.initializeTimeZones();
 }
 
@@ -45,83 +55,31 @@ class NotificationApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
-      home: SinistreFormScreen(), // Set SinistreFormScreen as the initial screen
+      home: FutureBuilder<bool>(
+        future: _checkLoginStatus(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else {
+            if (snapshot.data == true) {
+              return BottomNavBar(); // Use BottomNavBar here
+            } else {
+              return LoginScreen();
+            }
+          }
+        },
+      ),
       routes: {
         '/suivi': (context) => SuiviScreen(),
         '/sinistre_form': (context) => SinistreFormScreen(),
+        '/home': (context) => HomeScreen(),
+        '/profile': (context) => ProfileScreen(),
       },
     );
   }
-}
 
-class HomeScreen extends StatefulWidget {
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  late IO.Socket socket;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeSocket();
-  }
-
-  void _initializeSocket() {
-    socket = IO.io('http://192.168.1.16:3000', <String, dynamic>{
-      'transports': ['websocket'],
-    });
-
-    socket.on('connect', (_) {
-      print('connected to server');
-    });
-
-    socket.on('notification', (data) {
-      _showNotification(data['message']);
-    });
-
-    socket.on('disconnect', (_) {
-      print('disconnected from server');
-    });
-  }
-
-  Future<void> _showNotification(String message) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'your_channel_id',
-      'your_channel_name',
-      channelDescription: 'your channel description',
-      importance: Importance.max,
-      priority: Priority.high,
-      showWhen: false,
-    );
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      'Notification',
-      message,
-      platformChannelSpecifics,
-      payload: 'SuiviScreen', // Set payload for SuiviScreen
-    );
-  }
-
-  @override
-  void dispose() {
-    socket.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Notification App'),
-      ),
-      body: Center(
-        child: Text('Listening for notifications...'),
-      ),
-    );
+  Future<bool> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isLoggedIn') ?? false;
   }
 }
