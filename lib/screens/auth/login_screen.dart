@@ -3,6 +3,7 @@ import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 import '../home_screen.dart';
 import '../../data/repository.dart';
+import '../../bottom_nav_bar.dart';  // Import BottomNavBar
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -54,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => BottomNavBar()), // Navigate to BottomNavBar instead of HomeScreen
       );
     }
   }
