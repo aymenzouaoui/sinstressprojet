@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -9,7 +11,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
-  final LatLng _initialLocation = LatLng(37.7749, -122.4194); // Example: San Francisco
+  final LatLng _initialLocation = LatLng(36.8665, 10.1647); // Coordinates for Ariana, Tunis
   double _currentZoom = 14.0; // Initial zoom level
 
   Marker? _currentMarker; // Single marker
@@ -39,11 +41,25 @@ class _MapScreenState extends State<MapScreen> {
     _getAddressFromLatLng(latLng);
   }
 
-  void _getAddressFromLatLng(LatLng latLng) async {
-    // Implement the logic to retrieve address from latLng
-    // You can use a geocoding API to get the address
-    // For example, you can use the Google Geocoding API
-    // Make sure to import necessary packages and add the API key
+  Future<void> _getAddressFromLatLng(LatLng latLng) async {
+    final url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=${latLng.latitude}&lon=${latLng.longitude}&zoom=18&addressdetails=1';
+
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final address = data['display_name'];
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Address: $address'),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to fetch address'),
+        ),
+      );
+    }
   }
 
   void _onZoomIn() {
@@ -67,6 +83,9 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Interactive Map'),
+        centerTitle: true,
+        backgroundColor: Colors.teal,
+        leading: Icon(Icons.map),
       ),
       body: Stack(
         children: [
@@ -98,12 +117,14 @@ class _MapScreenState extends State<MapScreen> {
               children: [
                 FloatingActionButton(
                   mini: true,
+                  backgroundColor: Colors.teal,
                   child: Icon(Icons.zoom_in),
                   onPressed: _onZoomIn,
                 ),
                 SizedBox(height: 8),
                 FloatingActionButton(
                   mini: true,
+                  backgroundColor: Colors.teal,
                   child: Icon(Icons.zoom_out),
                   onPressed: _onZoomOut,
                 ),
