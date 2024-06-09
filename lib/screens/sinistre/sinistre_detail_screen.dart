@@ -2,19 +2,39 @@ import 'package:client/models/sinistre.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'mapScreen.dart'; // Import MapScreen
 
-class SinistreDetailScreen extends StatelessWidget {
+class SinistreDetailScreen extends StatefulWidget {
   final Sinistre sinistre;
 
   SinistreDetailScreen({required this.sinistre});
 
+  @override
+  _SinistreDetailScreenState createState() => _SinistreDetailScreenState();
+}
+
+class _SinistreDetailScreenState extends State<SinistreDetailScreen> {
   final PageController _pageController = PageController();
+  String _selectedAddress = 'No address selected';
+
+  Future<void> _navigateToMapScreen(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MapScreen()),
+    );
+
+    if (result != null && result is String) {
+      setState(() {
+        _selectedAddress = result;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF1976D3),
+        backgroundColor: Color(0xFF0866FF),
         title: Row(
           children: [
             CircleAvatar(
@@ -91,7 +111,7 @@ class SinistreDetailScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   Text(
-                    sinistre.description,
+                    widget.sinistre.description,
                     style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                   SizedBox(height: 16),
@@ -108,7 +128,7 @@ class SinistreDetailScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   Text(
-                    sinistre.status,
+                    widget.sinistre.status,
                     style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                   SizedBox(height: 16),
@@ -124,9 +144,19 @@ class SinistreDetailScreen extends StatelessWidget {
                     'Location:',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
-                  Text(
-                    sinistre.location,
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _selectedAddress == 'No address selected' ? widget.sinistre.location : _selectedAddress,
+                          style: TextStyle(fontSize: 16, color: Colors.black54),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.map, color: Color(0xFF0866FF)),
+                        onPressed: () => _navigateToMapScreen(context),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 16),
                 ],
@@ -142,7 +172,7 @@ class SinistreDetailScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   Text(
-                    DateFormat.yMMMd().format(sinistre.dateReported),
+                    DateFormat.yMMMd().format(widget.sinistre.dateReported),
                     style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                   SizedBox(height: 16),
@@ -159,7 +189,7 @@ class SinistreDetailScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   Text(
-                    '${sinistre.car.make} ${sinistre.car.model}',
+                    '${widget.sinistre.car.make} ${widget.sinistre.car.model}',
                     style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                   SizedBox(height: 16),
@@ -187,14 +217,14 @@ class SinistreDetailScreen extends StatelessWidget {
                     height: 200,
                     child: PageView.builder(
                       controller: _pageController,
-                      itemCount: sinistre.photos.length,
+                      itemCount: widget.sinistre.photos.length,
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
                             child: Image.network(
-                              sinistre.photos[index],
+                              widget.sinistre.photos[index],
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -206,10 +236,10 @@ class SinistreDetailScreen extends StatelessWidget {
                   Center(
                     child: SmoothPageIndicator(
                       controller: _pageController,
-                      count: sinistre.photos.length,
+                      count: widget.sinistre.photos.length,
                       effect: WormEffect(
                         dotColor: Colors.grey,
-                        activeDotColor: Color(0xFF1976D3),
+                        activeDotColor: Color(0xFF0866FF),
                         dotHeight: 8,
                         dotWidth: 8,
                       ),
