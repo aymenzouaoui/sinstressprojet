@@ -1,8 +1,11 @@
+import 'package:client/ViewModel/auth_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../home_screen.dart';
 import '../../data/repository.dart';
-import '../../models/user.dart';
-import 'login_screen.dart'; // Import the LoginScreen
+
+import '../../bottom_nav_bar.dart';
+import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -17,8 +20,6 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
   String _email = '';
   String _password = '';
   String _phoneNumber = '';
-  bool _isLoading = false;
-  final Repository _repository = Repository();
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -41,31 +42,19 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
 
   void _signup() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-
       _formKey.currentState!.save();
-
-      // Create a new user (you would implement proper user creation here)
-      User newUser = User(
-        id: _email,  // Using email as the ID for simplicity
-        name: _name,
-        email: _email,
-        phoneNumber: _phoneNumber,
-      );
-
-      // Simulate a user creation (in real scenario, save user to backend)
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+      bool success = await authViewModel.signup(_name, _email, _password, _phoneNumber);
+      if (success) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => BottomNavBar()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to sign up')),
+        );
+      }
     }
   }
 
@@ -161,8 +150,8 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                         ),
                         style: const TextStyle(color: Colors.white),
                         validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Please enter your email';
+                          if (value!.isEmpty || !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                            return 'Please enter a valid email';
                           }
                           return null;
                         },
@@ -185,8 +174,8 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                         style: const TextStyle(color: Colors.white),
                         obscureText: true,
                         validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Please enter your password';
+                          if (value!.isEmpty || value.length < 6) {
+                            return 'Password must be at least 6 characters';
                           }
                           return null;
                         },
@@ -218,9 +207,12 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                         },
                       ),
                       const SizedBox(height: 20),
-                      _isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : ElevatedButton(
+                      Consumer<AuthViewModel>(
+                        builder: (context, authViewModel, child) {
+                          if (authViewModel.isLoading) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else {
+                            return ElevatedButton(
                               onPressed: _signup,
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -241,7 +233,10 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                                   letterSpacing: -0.17,
                                 ),
                               ),
-                            ),
+                            );
+                          }
+                        },
+                      ),
                       const SizedBox(height: 20),
                       const Text(
                         'or',

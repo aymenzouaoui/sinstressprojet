@@ -1,4 +1,4 @@
-import 'car.dart';
+import 'package:client/models/car.dart';
 
 typedef void NotificationCallback(String message);
 
@@ -11,7 +11,6 @@ class Sinistre {
   final List<String> photos;
   final DateTime dateReported;
   final Car car;
-
   NotificationCallback? onStatusChange;
 
   Sinistre({

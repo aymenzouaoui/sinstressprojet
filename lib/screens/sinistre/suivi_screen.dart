@@ -1,9 +1,9 @@
 import 'package:client/models/sinistre.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:client/models/car.dart'; // Import Car class from the correct file
+import 'package:provider/provider.dart';
+import 'package:client/ViewModel/sinistre_view_model.dart';
 import 'sinistre_detail_screen.dart';
-
 
 class SuiviScreen extends StatefulWidget {
   @override
@@ -11,49 +11,16 @@ class SuiviScreen extends StatefulWidget {
 }
 
 class _SuiviScreenState extends State<SuiviScreen> {
-  List<Claim> claims = [
-    Claim(
-      type: 'Accident',
-      description: 'Car accident at main street.',
-      incidentDate: DateTime(2023, 5, 15),
-      status: 'Processing',
-    ),
-    Claim(
-      type: 'Theft',
-      description: 'Bike stolen from garage.',
-      incidentDate: DateTime(2023, 4, 10),
-      status: 'Approved',
-    ),
-    Claim(
-      type: 'Damage',
-      description: 'House damaged by hailstorm.',
-      incidentDate: DateTime(2023, 3, 20),
-      status: 'Rejected',
-    ),
-    Claim(
-      type: 'Other',
-      description: 'Lost phone.',
-      incidentDate: DateTime(2023, 6, 1),
-      status: 'Processing',
-    ),
-  ];
-
-  String _searchLocation = '';
-  String? _selectedStatus;
-  DateTime? _selectedDate;
+  @override
+  void initState() {
+    super.initState();
+    final sinistreViewModel = Provider.of<SinistreViewModel>(context, listen: false);
+    sinistreViewModel.fetchSinistres(); // Fetch user-specific sinistres
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<Claim> filteredClaims = claims.where((claim) {
-      bool matchesLocation = _searchLocation.isEmpty ||
-          claim.description.toLowerCase().contains(_searchLocation.toLowerCase());
-      bool matchesStatus = _selectedStatus == null || claim.status == _selectedStatus;
-      bool matchesDate = _selectedDate == null ||
-          (claim.incidentDate.year == _selectedDate!.year &&
-              claim.incidentDate.month == _selectedDate!.month &&
-              claim.incidentDate.day == _selectedDate!.day);
-      return matchesLocation && matchesStatus && matchesDate;
-    }).toList();
+    final sinistreViewModel = Provider.of<SinistreViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -74,97 +41,80 @@ class _SuiviScreenState extends State<SuiviScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ListView.builder(
-          itemCount: filteredClaims.length,
-          itemBuilder: (context, index) {
-            final claim = filteredClaims[index];
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 8.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              elevation: 5,
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(16.0),
-                leading: Icon(
-                  _getIconForClaimType(claim.type),
-                  size: 40,
-                  color: Colors.blue,
-                ),
-                title: Text(
-                  claim.type,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    Text(
-                      claim.description,
-                      style: const TextStyle(fontSize: 16),
+      body: sinistreViewModel.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView.builder(
+                itemCount: sinistreViewModel.sinistres.length,
+                itemBuilder: (context, index) {
+                  final sinistre = sinistreViewModel.sinistres[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Incident Date: ${DateFormat.yMMMd().format(claim.incidentDate)}',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Text(
-                          'Status: ',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        Chip(
-                          label: Text(
-                            claim.status,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                    elevation: 5,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16.0),
+                      leading: Icon(
+                        _getIconForClaimType(sinistre.car.make),
+                        size: 40,
+                        color: Colors.blue,
+                      ),
+                      title: Text(
+                        sinistre.description,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
+                          Text(
+                            sinistre.description,
+                            style: const TextStyle(fontSize: 16),
                           ),
-                          backgroundColor: _getStatusColor(claim.status),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  // Navigate to SinistreDetailScreen when a claim is tapped
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SinistreDetailScreen(sinistre: _convertClaimToSinistre(claim)),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Incident Date: ${DateFormat.yMMMd().format(sinistre.dateReported)}',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Text(
+                                'Status: ',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              Chip(
+                                label: Text(
+                                  sinistre.status,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                backgroundColor: _getStatusColor(sinistre.status),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios),
+                      onTap: () {
+                        // Navigate to SinistreDetailScreen when a sinistre is tapped
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SinistreDetailScreen(sinistre: sinistre),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },
               ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Sinistre _convertClaimToSinistre(Claim claim) {
-    return Sinistre(
-      id: '1',
-      userId: 'user1',
-      description: claim.description,
-      status: claim.status,
-      location: 'Sample Location',
-      photos: ['https://via.placeholder.com/150'],
-      dateReported: claim.incidentDate,
-      car: Car(
-        id: '1',
-        make: 'Toyota',
-        model: 'Corolla',
-        year: 2020,
-        licensePlate: 'XYZ123',
-      ),
+            ),
     );
   }
 
@@ -178,7 +128,7 @@ class _SuiviScreenState extends State<SuiviScreen> {
             decoration: const InputDecoration(hintText: 'Enter location'),
             onChanged: (value) {
               setState(() {
-                _searchLocation = value;
+                // Handle search by location logic here
               });
             },
           ),
@@ -206,7 +156,7 @@ class _SuiviScreenState extends State<SuiviScreen> {
             children: [
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(hintText: 'Select status'),
-                value: _selectedStatus,
+                value: null,
                 items: ['Processing', 'Approved', 'Rejected']
                     .map((status) => DropdownMenuItem(
                           value: status,
@@ -215,7 +165,7 @@ class _SuiviScreenState extends State<SuiviScreen> {
                     .toList(),
                 onChanged: (value) {
                   setState(() {
-                    _selectedStatus = value;
+                    // Handle status filter logic here
                   });
                 },
               ),
@@ -224,13 +174,13 @@ class _SuiviScreenState extends State<SuiviScreen> {
                 onTap: () async {
                   DateTime? pickedDate = await showDatePicker(
                     context: context,
-                    initialDate: _selectedDate ?? DateTime.now(),
+                    initialDate: DateTime.now(),
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2101),
                   );
                   if (pickedDate != null) {
                     setState(() {
-                      _selectedDate = pickedDate;
+                      // Handle date filter logic here
                     });
                   }
                 },
@@ -239,9 +189,7 @@ class _SuiviScreenState extends State<SuiviScreen> {
                     hintText: 'Select date',
                   ),
                   child: Text(
-                    _selectedDate == null
-                        ? 'No date selected'
-                        : DateFormat.yMMMd().format(_selectedDate!),
+                    'No date selected',
                   ),
                 ),
               ),
@@ -250,10 +198,6 @@ class _SuiviScreenState extends State<SuiviScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                setState(() {
-                  _selectedStatus = null;
-                  _selectedDate = null;
-                });
                 Navigator.of(context).pop();
               },
               child: const Text('Clear Filters'),
@@ -293,18 +237,4 @@ class _SuiviScreenState extends State<SuiviScreen> {
         return Colors.orange;
     }
   }
-}
-
-class Claim {
-  final String type;
-  final String description;
-  final DateTime incidentDate;
-  final String status;
-
-  Claim({
-    required this.type,
-    required this.description,
-    required this.incidentDate,
-    required this.status,
-  });
 }

@@ -1,16 +1,18 @@
-// lib/main.dart
-
 import 'dart:io';
-import 'package:client/screens/profile/ProfileScreen.dart';
+import 'package:client/ViewModel/auth_view_model.dart';
+import 'package:client/ViewModel/sinistre_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:client/screens/auth/login_screen.dart';
-import 'package:client/screens/sinistre/suivi_screen.dart';
-import 'package:client/screens/sinistre/sinistre_form_screen.dart';
-import 'package:client/screens/home_screen.dart';
+import 'package:provider/provider.dart';
+
+import 'screens/auth/login_screen.dart';
+import 'screens/sinistre/suivi_screen.dart';
+import 'screens/sinistre/sinistre_form_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/profile/ProfileScreen.dart';
 import 'bottom_nav_bar.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -19,7 +21,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
   await _initializeNotifications();
-  runApp(NotificationApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthViewModel()),
+        ChangeNotifierProvider(create: (context) => SinistreViewModel()),
+      ],
+      child: NotificationApp(),
+    ),
+  );
 }
 
 class MyHttpOverrides extends HttpOverrides {
@@ -55,13 +65,12 @@ class NotificationApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
-      home: FutureBuilder<bool>(
-        future: _checkLoginStatus(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      home: Consumer<AuthViewModel>(
+        builder: (context, authViewModel, child) {
+          if (authViewModel.isLoading) {
             return Center(child: CircularProgressIndicator());
           } else {
-            if (snapshot.data == true) {
+            if (authViewModel.isLoggedIn) {
               return BottomNavBar(); // Use BottomNavBar here
             } else {
               return LoginScreen();
@@ -76,10 +85,5 @@ class NotificationApp extends StatelessWidget {
         '/profile': (context) => ProfileScreen(),
       },
     );
-  }
-
-  Future<bool> _checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('isLoggedIn') ?? false;
   }
 }

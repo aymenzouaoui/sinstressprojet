@@ -1,8 +1,8 @@
+import 'package:client/ViewModel/auth_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
-import '../home_screen.dart';
-import '../../data/repository.dart';
 import '../../bottom_nav_bar.dart';  // Import BottomNavBar
 
 class LoginScreen extends StatefulWidget {
@@ -16,8 +16,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   final _formKey = GlobalKey<FormState>();
   String _email = '';
   String _password = '';
-  bool _isLoading = false;
-  final Repository _repository = Repository();
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -40,23 +38,19 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   void _login() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-
       _formKey.currentState!.save();
-
-      // Simulate a login process (in real scenario, validate user from backend)
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => BottomNavBar()), // Navigate to BottomNavBar instead of HomeScreen
-      );
+      final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+      await authViewModel.login(_email, _password);
+      if (authViewModel.isLoggedIn) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => BottomNavBar()), // Navigate to BottomNavBar instead of HomeScreen
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to login')),
+        );
+      }
     }
   }
 
@@ -163,9 +157,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         },
                       ),
                       const SizedBox(height: 20),
-                      _isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : ElevatedButton(
+                      Consumer<AuthViewModel>(
+                        builder: (context, authViewModel, child) {
+                          if (authViewModel.isLoading) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else {
+                            return ElevatedButton(
                               onPressed: _login,
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -186,7 +183,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   letterSpacing: -0.17,
                                 ),
                               ),
-                            ),
+                            );
+                          }
+                        },
+                      ),
                       const SizedBox(height: 20),
                       TextButton(
                         onPressed: () {
@@ -287,7 +287,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
                                 blurRadius: 10,
-                                offset: Offset(0, 5),
+                                offset: const Offset(0, 5),
                               ),
                             ],
                           ),
