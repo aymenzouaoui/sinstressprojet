@@ -2,22 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(MyApp());
-}
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Sinistre Assurance'),
-    );
+class BottomNavProvider with ChangeNotifier {
+  int _bottomNavIndex = 0;
+  late Animation<double> _borderRadiusAnimation;
+  late AnimationController _hideBottomBarAnimationController;
+
+  int get bottomNavIndex => _bottomNavIndex;
+
+  set bottomNavIndex(int index) {
+    _bottomNavIndex = index;
+    notifyListeners();
   }
+
+  void setBorderRadiusAnimation(Animation<double> animation) {
+    _borderRadiusAnimation = animation;
+  }
+
+  Animation<double> get borderRadiusAnimation => _borderRadiusAnimation;
+
+  void setHideBottomBarAnimationController(AnimationController controller) {
+    _hideBottomBarAnimationController = controller;
+  }
+
+  AnimationController get hideBottomBarAnimationController => _hideBottomBarAnimationController;
 }
 
 class MyHomePage extends StatefulWidget {
@@ -31,8 +41,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   final autoSizeGroup = AutoSizeGroup();
-  var _bottomNavIndex = 0; // default index of a first screen
-
   late AnimationController _fabAnimationController;
   late AnimationController _borderRadiusAnimationController;
   late Animation<double> fabAnimation;
@@ -42,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   late AnimationController _hideBottomBarAnimationController;
 
   final iconList = <IconData>[
-    Icons.notifications_on_sharp,
+    Icons.home_filled,
     Icons.menu,
     Icons.mail,
     Icons.person_outline,
@@ -79,6 +87,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       vsync: this,
     );
 
+    var bottomNavProvider = Provider.of<BottomNavProvider>(context, listen: false);
+    bottomNavProvider.setHideBottomBarAnimationController(_hideBottomBarAnimationController);
+    bottomNavProvider.setBorderRadiusAnimation(borderRadiusAnimation);
+
     Future.delayed(
       Duration(seconds: 1),
       () => _fabAnimationController.forward(),
@@ -90,8 +102,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   bool onScrollNotification(ScrollNotification notification) {
-    if (notification is UserScrollNotification &&
-        notification.metrics.axis == Axis.vertical) {
+    if (notification is UserScrollNotification && notification.metrics.axis == Axis.vertical) {
       switch (notification.direction) {
         case ScrollDirection.forward:
           _hideBottomBarAnimationController.reverse();
@@ -108,16 +119,38 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return false;
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       extendBody: true,
       appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: TextStyle(color: Colors.white),
+        title: Text(widget.title, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
+        centerTitle: true,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF3366FF), Color(0xFF00CCFF)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.notifications),
+            onPressed: () {
+              // Handle notifications
+            },
+          ),
+        ],
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {
+            // Handle menu
+          },
         ),
       ),
       body: NotificationListener<ScrollNotification>(
@@ -133,67 +166,57 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 HorizontalList(screenWidth: screenWidth),
                 const SizedBox(height: 16),
                 VerticalList(),
+                const SizedBox(height: 16), // Added padding between the list and bottom navigation bar
               ],
             ),
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.home_filled,
-          color: Color.fromARGB(255, 60, 3, 98),
-        ),
-        onPressed: () {
-          _fabAnimationController.reset();
-          _borderRadiusAnimationController.reset();
-          _borderRadiusAnimationController.forward();
-          _fabAnimationController.forward();
-        },
-      ),
+     
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: AnimatedBottomNavigationBar.builder(
-        itemCount: iconList.length,
-        tabBuilder: (int index, bool isActive) {
-          final color = isActive ? Color.fromARGB(204, 227, 20, 20) : Color.fromARGB(255, 40, 28, 206);
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                iconList[index],
-                size: 24,
-                color: color,
-              ),
-              const SizedBox(height: 4),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: AutoSizeText(
-                  '',
-                  maxLines: 1,
-                  style: TextStyle(color: color),
-                  group: autoSizeGroup,
-                ),
-              )
-            ],
+      bottomNavigationBar: Consumer<BottomNavProvider>(
+        builder: (context, provider, child) {
+          return AnimatedBottomNavigationBar.builder(
+            itemCount: iconList.length,
+            tabBuilder: (int index, bool isActive) {
+              final color = isActive ? Color.fromARGB(204, 227, 20, 20) : Color.fromARGB(255, 40, 28, 206);
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(iconList[index], size: 24, color: color),
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: AutoSizeText(
+                      '',
+                      maxLines: 1,
+                      style: TextStyle(color: color),
+                      group: autoSizeGroup,
+                    ),
+                  ),
+                ],
+              );
+            },
+            backgroundColor: Colors.white,
+            activeIndex: provider.bottomNavIndex,
+            splashColor: Colors.blue,
+            notchAndCornersAnimation: provider.borderRadiusAnimation,
+            splashSpeedInMilliseconds: 300,
+            notchSmoothness: NotchSmoothness.defaultEdge,
+            gapLocation: GapLocation.center,
+            leftCornerRadius: 32,
+            rightCornerRadius: 32,
+            onTap: (index) => provider.bottomNavIndex = index,
+            hideAnimationController: provider.hideBottomBarAnimationController,
+            shadow: BoxShadow(
+              offset: Offset(0, 1),
+              blurRadius: 12,
+              spreadRadius: 0.5,
+              color: Colors.blue,
+            ),
           );
         },
-        backgroundColor: Colors.white,
-        activeIndex: _bottomNavIndex,
-        splashColor: Colors.blue,
-        notchAndCornersAnimation: borderRadiusAnimation,
-        splashSpeedInMilliseconds: 300,
-        notchSmoothness: NotchSmoothness.defaultEdge,
-        gapLocation: GapLocation.center,
-        leftCornerRadius: 32,
-        rightCornerRadius: 32,
-        onTap: (index) => setState(() => _bottomNavIndex = index),
-        hideAnimationController: _hideBottomBarAnimationController,
-        shadow: BoxShadow(
-          offset: Offset(0, 1),
-          blurRadius: 12,
-          spreadRadius: 0.5,
-          color: Colors.blue,
-        ),
       ),
     );
   }
@@ -212,19 +235,12 @@ class WelcomeCard extends StatelessWidget {
           children: [
             Text(
               'Bienvenue à Sinistre Assurance',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Que pouvons-nous faire pour vous ?',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
           ],
         ),
@@ -247,21 +263,9 @@ class HorizontalList extends StatelessWidget {
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
-          _buildCard(
-            context,
-            'Assurance Véhicule',
-            Icons.car_rental,
-            cardWidth,
-            AssuranceVehiculePage(),
-          ),
+          _buildCard(context, 'Assurance Véhicule', Icons.car_rental, cardWidth, AssuranceVehiculePage()),
           const SizedBox(width: 6),
-          _buildCard(
-            context,
-            'Liste Des Véhicules',
-            Icons.list,
-            cardWidth,
-            ListeDesVehiculesPage(),
-          ),
+          _buildCard(context, 'Liste Des Véhicules', Icons.list, cardWidth, ListeDesVehiculesPage()),
         ],
       ),
     );
@@ -270,10 +274,7 @@ class HorizontalList extends StatelessWidget {
   Widget _buildCard(BuildContext context, String title, IconData icon, double width, Widget destinationPage) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => destinationPage),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (context) => destinationPage));
       },
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -285,11 +286,7 @@ class HorizontalList extends StatelessWidget {
             children: [
               Icon(icon, size: 40, color: Colors.blue),
               const SizedBox(height: 8),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12),
-              ),
+              Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 12)),
             ],
           ),
         ),
@@ -305,11 +302,9 @@ class VerticalList extends StatelessWidget {
       children: [
         _buildListItem('Déclaration Un Sinistre', 'Un accident?', Icons.report),
         const Divider(),
-        _buildListItem(
-            'Suivre Un Sinistre', 'Suivrez vos sinistres', Icons.track_changes),
+        _buildListItem('Suivre Un Sinistre', 'Suivrez vos sinistres', Icons.track_changes),
         const Divider(),
-        _buildListItem(
-            'Demander Un Assistant', 'Suivrez vos sinistres', Icons.assistant),
+        _buildListItem('Demander Un Assistant', 'Suivrez vos sinistres', Icons.assistant),
       ],
     );
   }
@@ -328,6 +323,15 @@ class VerticalList extends StatelessWidget {
 }
 
 class AssuranceVehiculePage extends StatelessWidget {
+  final autoSizeGroup = AutoSizeGroup();
+
+  final iconList = <IconData>[
+    Icons.home,
+    Icons.menu,
+    Icons.mail,
+    Icons.person_outline,
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -337,11 +341,64 @@ class AssuranceVehiculePage extends StatelessWidget {
       body: Center(
         child: Text('Page d\'Assurance Véhicule'),
       ),
+      bottomNavigationBar: Consumer<BottomNavProvider>(
+        builder: (context, provider, child) {
+          return AnimatedBottomNavigationBar.builder(
+            itemCount: iconList.length,
+            tabBuilder: (int index, bool isActive) {
+              final color = isActive ? Color.fromARGB(204, 227, 20, 20) : Color.fromARGB(255, 40, 28, 206);
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(iconList[index], size: 24, color: color),
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: AutoSizeText(
+                      '',
+                      maxLines: 1,
+                      style: TextStyle(color: color),
+                      group: autoSizeGroup,
+                    ),
+                  )
+                ],
+              );
+            },
+            backgroundColor: Colors.white,
+            activeIndex: provider.bottomNavIndex,
+            splashColor: Colors.blue,
+            notchAndCornersAnimation: provider.borderRadiusAnimation,
+            splashSpeedInMilliseconds: 300,
+            notchSmoothness: NotchSmoothness.defaultEdge,
+            gapLocation: GapLocation.center,
+            leftCornerRadius: 32,
+            rightCornerRadius: 32,
+            onTap: (index) => provider.bottomNavIndex = index,
+            hideAnimationController: provider.hideBottomBarAnimationController,
+            shadow: BoxShadow(
+              offset: Offset(0, 1),
+              blurRadius: 12,
+              spreadRadius: 0.5,
+              color: Colors.blue,
+            ),
+          );
+        },
+      ),
     );
   }
 }
 
 class ListeDesVehiculesPage extends StatelessWidget {
+  final autoSizeGroup = AutoSizeGroup();
+
+  final iconList = <IconData>[
+    Icons.notifications_on_sharp,
+    Icons.menu,
+    Icons.mail,
+    Icons.person_outline,
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -351,6 +408,62 @@ class ListeDesVehiculesPage extends StatelessWidget {
       body: Center(
         child: Text('Page de la Liste des Véhicules'),
       ),
+      bottomNavigationBar: Consumer<BottomNavProvider>(
+        builder: (context, provider, child) {
+          return AnimatedBottomNavigationBar.builder(
+            itemCount: iconList.length,
+            tabBuilder: (int index, bool isActive) {
+              final color = isActive ? Color.fromARGB(204, 227, 20, 20) : Color.fromARGB(255, 40, 28, 206);
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(iconList[index], size: 24, color: color),
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: AutoSizeText(
+                      '',
+                      maxLines: 1,
+                      style: TextStyle(color: color),
+                      group: autoSizeGroup,
+                    ),
+                  )
+                ],
+              );
+            },
+            backgroundColor: Colors.white,
+            activeIndex: provider.bottomNavIndex,
+            splashColor: Colors.blue,
+            notchAndCornersAnimation: provider.borderRadiusAnimation,
+            splashSpeedInMilliseconds: 300,
+            notchSmoothness: NotchSmoothness.defaultEdge,
+            gapLocation: GapLocation.center,
+            leftCornerRadius: 32,
+            rightCornerRadius: 32,
+            onTap: (index) => provider.bottomNavIndex = index,
+            hideAnimationController: provider.hideBottomBarAnimationController,
+            shadow: BoxShadow(
+              offset: Offset(0, 1),
+              blurRadius: 12,
+              spreadRadius: 0.5,
+              color: Colors.blue,
+            ),
+          );
+        },
+      ),
     );
   }
 }
+/* floatingActionButton: FloatingActionButton(
+        child: Icon(
+          Icons.home_filled,
+          color: Color.fromARGB(255, 60, 3, 98),
+        ),
+        onPressed: () {
+          _fabAnimationController.reset();
+          _borderRadiusAnimationController.reset();
+          _borderRadiusAnimationController.forward();
+          _fabAnimationController.forward();
+        },
+      ),*/

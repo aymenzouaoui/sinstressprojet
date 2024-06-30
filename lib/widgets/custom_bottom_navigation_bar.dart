@@ -21,7 +21,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> w
   late AnimationController _hideBottomBarAnimationController;
 
   final iconList = <IconData>[
-    Icons.notifications_on_sharp,
+    Icons.home_sharp,
     Icons.menu,
     Icons.mail,
     Icons.person_outline,
