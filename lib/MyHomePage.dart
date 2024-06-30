@@ -1,10 +1,24 @@
+import 'package:flutter/material.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-
-import 'package:client/widgets/NavigationScreen.dart';
-
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MyHomePage(title: 'Sinistre Assurance'),
+    );
+  }
+}
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -28,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   late AnimationController _hideBottomBarAnimationController;
 
   final iconList = <IconData>[
-    Icons.home,
+    Icons.notifications_on_sharp,
     Icons.menu,
     Icons.mail,
     Icons.person_outline,
@@ -96,6 +110,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       extendBody: true,
       appBar: AppBar(
@@ -106,12 +122,26 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
       body: NotificationListener<ScrollNotification>(
         onNotification: onScrollNotification,
-        child: NavigationScreen(iconList[_bottomNavIndex]),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                WelcomeCard(),
+                const SizedBox(height: 16),
+                HorizontalList(screenWidth: screenWidth),
+                const SizedBox(height: 16),
+                VerticalList(),
+              ],
+            ),
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(
-          Icons.add,
-          color: Colors.white,
+          Icons.home_filled,
+          color: Color.fromARGB(255, 60, 3, 98),
         ),
         onPressed: () {
           _fabAnimationController.reset();
@@ -138,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: AutoSizeText(
-                  "Tab $index",
+                  '',
                   maxLines: 1,
                   style: TextStyle(color: color),
                   group: autoSizeGroup,
@@ -164,6 +194,162 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           spreadRadius: 0.5,
           color: Colors.blue,
         ),
+      ),
+    );
+  }
+}
+
+class WelcomeCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.blue[800],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Bienvenue à Sinistre Assurance',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Que pouvons-nous faire pour vous ?',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class HorizontalList extends StatelessWidget {
+  final double screenWidth;
+
+  HorizontalList({required this.screenWidth});
+
+  @override
+  Widget build(BuildContext context) {
+    double cardWidth = screenWidth * 0.4; // Adapts the card width
+
+    return Container(
+      height: 120,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _buildCard(
+            context,
+            'Assurance Véhicule',
+            Icons.car_rental,
+            cardWidth,
+            AssuranceVehiculePage(),
+          ),
+          const SizedBox(width: 6),
+          _buildCard(
+            context,
+            'Liste Des Véhicules',
+            Icons.list,
+            cardWidth,
+            ListeDesVehiculesPage(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, String title, IconData icon, double width, Widget destinationPage) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => destinationPage),
+        );
+      },
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Container(
+          width: width,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 40, color: Colors.blue),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class VerticalList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _buildListItem('Déclaration Un Sinistre', 'Un accident?', Icons.report),
+        const Divider(),
+        _buildListItem(
+            'Suivre Un Sinistre', 'Suivrez vos sinistres', Icons.track_changes),
+        const Divider(),
+        _buildListItem(
+            'Demander Un Assistant', 'Suivrez vos sinistres', Icons.assistant),
+      ],
+    );
+  }
+
+  Widget _buildListItem(String title, String subtitle, IconData icon) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.blue),
+      title: Text(title, style: TextStyle(fontSize: 18)),
+      subtitle: Text(subtitle),
+      trailing: Icon(Icons.chevron_right),
+      onTap: () {
+        // Handle list item tap
+      },
+    );
+  }
+}
+
+class AssuranceVehiculePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Assurance Véhicule'),
+      ),
+      body: Center(
+        child: Text('Page d\'Assurance Véhicule'),
+      ),
+    );
+  }
+}
+
+class ListeDesVehiculesPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Liste des Véhicules'),
+      ),
+      body: Center(
+        child: Text('Page de la Liste des Véhicules'),
       ),
     );
   }

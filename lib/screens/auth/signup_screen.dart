@@ -1,10 +1,10 @@
+import 'package:client/MyHomePage.dart';
 import 'package:client/ViewModel/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../home_screen.dart';
-import '../../data/repository.dart';
 
-import '../../bottom_nav_bar.dart';
+
+
 import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -48,7 +48,7 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
       if (success) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BottomNavBar()),
+          MaterialPageRoute(builder: (context) => MyHomePage(title: '',)),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,9 +1,10 @@
+import 'package:client/MyHomePage.dart';
 import 'package:client/ViewModel/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
-import '../../bottom_nav_bar.dart';  // Import BottomNavBar
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       if (authViewModel.isLoggedIn) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BottomNavBar()), // Navigate to BottomNavBar instead of HomeScreen
+          MaterialPageRoute(builder: (context) => MyHomePage(title: "")), // Navigate to BottomNavBar instead of HomeScreen
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

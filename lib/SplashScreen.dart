@@ -1,7 +1,6 @@
-import 'package:client/MyHomePage.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:client/MyHomePage.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -19,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MyHomePage(title: 'Animated Navigation Bottom Bar')),
+        MaterialPageRoute(builder: (context) => MyHomePage(title: 'Welcome To Sinistre Automobile')),
       );
     });
   }
@@ -27,28 +26,28 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: Color.fromARGB(255, 253, 253, 253),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
               'assets/logoa.png', // Replace with your logo asset path
-              width: 750,
-              height: 750,
+              width: 400,
+              height: 400,
             ),
             SizedBox(height: 20),
             Text(
               'SINISTRE AUTOMOBILE',
               style: TextStyle(
                 fontSize: 24,
-                color: Color.fromARGB(255, 34, 5, 112),
+                color: Color.fromARGB(255, 5, 17, 148),
                 fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(height: 20),
             SpinKitFadingCircle(
-               color: Color.fromARGB(255, 34, 5, 112),
+              color: Color.fromARGB(255, 28, 2, 94),
               size: 50.0,
             ),
           ],
