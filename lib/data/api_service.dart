@@ -42,7 +42,7 @@ class ApiService {
         'Authorization': 'Bearer $token',
       },
     );
-
+      print(response.body);
     if (response.statusCode == 200) {
       List jsonResponse = jsonDecode(response.body);
       return jsonResponse.map((sinistre) => Sinistre.fromJson(sinistre)).toList();
