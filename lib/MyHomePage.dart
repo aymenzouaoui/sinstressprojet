@@ -4,7 +4,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
-
 class BottomNavProvider with ChangeNotifier {
   int _bottomNavIndex = 0;
   late Animation<double> _borderRadiusAnimation;
@@ -27,7 +26,8 @@ class BottomNavProvider with ChangeNotifier {
     _hideBottomBarAnimationController = controller;
   }
 
-  AnimationController get hideBottomBarAnimationController => _hideBottomBarAnimationController;
+  AnimationController get hideBottomBarAnimationController =>
+      _hideBottomBarAnimationController;
 }
 
 class MyHomePage extends StatefulWidget {
@@ -39,8 +39,8 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  final autoSizeGroup = AutoSizeGroup();
+class _MyHomePageState extends State<MyHomePage>
+    with TickerProviderStateMixin {
   late AnimationController _fabAnimationController;
   late AnimationController _borderRadiusAnimationController;
   late Animation<double> fabAnimation;
@@ -87,8 +87,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       vsync: this,
     );
 
-    var bottomNavProvider = Provider.of<BottomNavProvider>(context, listen: false);
-    bottomNavProvider.setHideBottomBarAnimationController(_hideBottomBarAnimationController);
+    var bottomNavProvider =
+        Provider.of<BottomNavProvider>(context, listen: false);
+    bottomNavProvider
+        .setHideBottomBarAnimationController(_hideBottomBarAnimationController);
     bottomNavProvider.setBorderRadiusAnimation(borderRadiusAnimation);
 
     Future.delayed(
@@ -102,7 +104,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   bool onScrollNotification(ScrollNotification notification) {
-    if (notification is UserScrollNotification && notification.metrics.axis == Axis.vertical) {
+    if (notification is UserScrollNotification &&
+        notification.metrics.axis == Axis.vertical) {
       switch (notification.direction) {
         case ScrollDirection.forward:
           _hideBottomBarAnimationController.reverse();
@@ -119,14 +122,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return false;
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       extendBody: true,
       appBar: AppBar(
-        title: Text(widget.title, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
+        title: Text(widget.title,
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
         centerTitle: true,
         elevation: 0,
         flexibleSpace: Container(
@@ -172,14 +177,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           ),
         ),
       ),
-     
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: Consumer<BottomNavProvider>(
         builder: (context, provider, child) {
           return AnimatedBottomNavigationBar.builder(
             itemCount: iconList.length,
             tabBuilder: (int index, bool isActive) {
-              final color = isActive ? Color.fromARGB(204, 227, 20, 20) : Color.fromARGB(255, 40, 28, 206);
+              final color =
+                  isActive ? Color.fromARGB(204, 227, 20, 20) : Color.fromARGB(255, 40, 28, 206);
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -189,10 +194,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: AutoSizeText(
-                      '',
+                      '', // Ajouter les noms des onglets ici
                       maxLines: 1,
                       style: TextStyle(color: color),
-                      group: autoSizeGroup,
                     ),
                   ),
                 ],
@@ -235,7 +239,8 @@ class WelcomeCard extends StatelessWidget {
           children: [
             Text(
               'Bienvenue à Sinistre Assurance',
-              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -263,18 +268,22 @@ class HorizontalList extends StatelessWidget {
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
-          _buildCard(context, 'Assurance Véhicule', Icons.car_rental, cardWidth, AssuranceVehiculePage()),
+          _buildCard(context, 'Assurance Véhicule', Icons.car_rental, cardWidth,
+              AssuranceVehiculePage()),
           const SizedBox(width: 6),
-          _buildCard(context, 'Liste Des Véhicules', Icons.list, cardWidth, ListeDesVehiculesPage()),
+          _buildCard(context, 'Liste Des Véhicules', Icons.list, cardWidth,
+              ListeDesVehiculesPage()),
         ],
       ),
     );
   }
 
-  Widget _buildCard(BuildContext context, String title, IconData icon, double width, Widget destinationPage) {
+  Widget _buildCard(BuildContext context, String title, IconData icon,
+      double width, Widget destinationPage) {
     return InkWell(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => destinationPage));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => destinationPage));
       },
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -346,7 +355,8 @@ class AssuranceVehiculePage extends StatelessWidget {
           return AnimatedBottomNavigationBar.builder(
             itemCount: iconList.length,
             tabBuilder: (int index, bool isActive) {
-              final color = isActive ? Color.fromARGB(204, 227, 20, 20) : Color.fromARGB(255, 40, 28, 206);
+              final color =
+                  isActive ? Color.fromARGB(204, 227, 20, 20) : Color.fromARGB(255, 40, 28, 206);
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -356,7 +366,7 @@ class AssuranceVehiculePage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: AutoSizeText(
-                      '',
+                      '', // Ajouter les noms des onglets ici
                       maxLines: 1,
                       style: TextStyle(color: color),
                       group: autoSizeGroup,
@@ -413,7 +423,8 @@ class ListeDesVehiculesPage extends StatelessWidget {
           return AnimatedBottomNavigationBar.builder(
             itemCount: iconList.length,
             tabBuilder: (int index, bool isActive) {
-              final color = isActive ? Color.fromARGB(204, 227, 20, 20) : Color.fromARGB(255, 40, 28, 206);
+              final color =
+                  isActive ? Color.fromARGB(204, 227, 20, 20) : Color.fromARGB(255, 40, 28, 206);
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -423,7 +434,7 @@ class ListeDesVehiculesPage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: AutoSizeText(
-                      '',
+                      '', // Ajouter les noms des onglets ici
                       maxLines: 1,
                       style: TextStyle(color: color),
                       group: autoSizeGroup,
@@ -455,15 +466,3 @@ class ListeDesVehiculesPage extends StatelessWidget {
     );
   }
 }
-/* floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.home_filled,
-          color: Color.fromARGB(255, 60, 3, 98),
-        ),
-        onPressed: () {
-          _fabAnimationController.reset();
-          _borderRadiusAnimationController.reset();
-          _borderRadiusAnimationController.forward();
-          _fabAnimationController.forward();
-        },
-      ),*/
