@@ -1,3 +1,4 @@
+import 'package:client/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:client/MyHomePage.dart';
@@ -18,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MyHomePage(title: 'Welcome To Sinistre Automobile')),
+        MaterialPageRoute(builder: (context) => LoginScreen()),
       );
     });
   }

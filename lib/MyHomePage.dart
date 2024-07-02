@@ -1,3 +1,5 @@
+import 'package:client/screens/sinistre/sinistre_form_screen.dart';
+import 'package:client/screens/sinistre/suivi_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -303,22 +305,21 @@ class HorizontalList extends StatelessWidget {
     );
   }
 }
-
 class VerticalList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _buildListItem('Déclaration Un Sinistre', 'Un accident?', Icons.report),
+        _buildListItem(context, 'Déclaration Un Sinistre', 'Un accident?', Icons.report, SinistreFormScreen()),
         const Divider(),
-        _buildListItem('Suivre Un Sinistre', 'Suivrez vos sinistres', Icons.track_changes),
+        _buildListItem(context, 'Suivre Un Sinistre', 'Suivrez vos sinistres', Icons.track_changes, SuiviScreen()),
         const Divider(),
-        _buildListItem('Demander Un Assistant', 'Suivrez vos sinistres', Icons.assistant),
+        _buildListItem(context, 'Demander Un Assistant', 'Suivrez vos sinistres', Icons.assistant, SuiviScreen()),
       ],
     );
   }
 
-  Widget _buildListItem(String title, String subtitle, IconData icon) {
+  Widget _buildListItem(BuildContext context, String title, String subtitle, IconData icon, Widget screen) {
     return ListTile(
       leading: Icon(icon, color: Colors.blue),
       title: Text(title, style: TextStyle(fontSize: 18)),
@@ -326,11 +327,14 @@ class VerticalList extends StatelessWidget {
       trailing: Icon(Icons.chevron_right),
       onTap: () {
         // Handle list item tap
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => screen),
+        );
       },
     );
   }
 }
-
 class AssuranceVehiculePage extends StatelessWidget {
   final autoSizeGroup = AutoSizeGroup();
 
