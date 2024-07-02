@@ -1,10 +1,9 @@
-import 'package:client/MyHomePage.dart';
-import 'package:client/ViewModel/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
-
+import 'package:client/ViewModel/auth_view_model.dart';
+import 'package:client/MyHomePage.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -49,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to login')),
+          SnackBar(content: Text('Échec de la connexion')),
         );
       }
     }
@@ -82,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF6D85E3), Color(0xFF2F80ED)],
+                colors: [Color(0xFF1e3c72), Color(0xFF2a5298)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -98,12 +97,18 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const SizedBox(height: 100),
+                      const SizedBox(height: 50),
+                      const CircleAvatar(
+                        radius: 50,
+                        backgroundImage: AssetImage('assets/logoa.png'), // Add a logo related to your insurance app
+                        backgroundColor: Colors.transparent,
+                      ),
+                      const SizedBox(height: 20),
                       const Text(
-                        'Login',
+                        'Connexion',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 34,
+                          fontSize: 28,
                           fontFamily: 'Roboto',
                           fontWeight: FontWeight.w500,
                           letterSpacing: -0.34,
@@ -113,10 +118,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       const SizedBox(height: 20),
                       TextFormField(
                         decoration: InputDecoration(
-                          hintText: 'Enter your email',
+                          hintText: 'Entrez votre email',
                           hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
                           filled: true,
                           fillColor: Colors.white.withOpacity(0.1),
+                          prefixIcon: Icon(Icons.email, color: Colors.white.withOpacity(0.7)),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide.none,
@@ -125,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         style: const TextStyle(color: Colors.white),
                         validator: (value) {
                           if (value!.isEmpty) {
-                            return 'Please enter your email';
+                            return 'Veuillez entrer votre email';
                           }
                           return null;
                         },
@@ -136,10 +142,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       const SizedBox(height: 20),
                       TextFormField(
                         decoration: InputDecoration(
-                          hintText: 'Enter your password',
+                          hintText: 'Entrez votre mot de passe',
                           hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
                           filled: true,
                           fillColor: Colors.white.withOpacity(0.1),
+                          prefixIcon: Icon(Icons.lock, color: Colors.white.withOpacity(0.7)),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide.none,
@@ -149,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         obscureText: true,
                         validator: (value) {
                           if (value!.isEmpty) {
-                            return 'Please enter your password';
+                            return 'Veuillez entrer votre mot de passe';
                           }
                           return null;
                         },
@@ -175,9 +182,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 shadowColor: Colors.black,
                               ),
                               child: const Text(
-                                'Login',
+                                'Connexion',
                                 style: TextStyle(
-                                  color: Color(0xFF2F80ED),
+                                  color: Color(0xFF2a5298),
                                   fontSize: 17,
                                   fontFamily: 'Roboto',
                                   fontWeight: FontWeight.w500,
@@ -197,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           );
                         },
                         child: const Text(
-                          'Forgot Password?',
+                          'Mot de passe oublié?',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 15,
@@ -209,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ),
                       const SizedBox(height: 20),
                       const Text(
-                        'or',
+                        'ou',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 15,
@@ -226,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         },
                         icon: const FlutterLogo(),
                         label: const Text(
-                          'Login with Google',
+                          'Connexion avec Google',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 17,
@@ -245,32 +252,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           shadowColor: Colors.black,
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          // Handle login with Apple
-                        },
-                        icon: const Icon(Icons.apple),
-                        label: const Text(
-                          'Login with Apple',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: -0.17,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          backgroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 5,
-                          shadowColor: Colors.black,
-                        ),
-                      ),
+                     
                       const SizedBox(height: 20),
                       GestureDetector(
                         onTap: () {
@@ -280,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             gradient: LinearGradient(
-                              colors: [Color(0xFF6D85E3), Color(0xFF2F80ED)],
+                              colors: [Color(0xFF1e3c72), Color(0xFF2a5298)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -294,7 +276,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: const Text(
-                            'Sign Up',
+                            'Créer un compte',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 17,
