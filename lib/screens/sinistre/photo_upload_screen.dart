@@ -21,12 +21,46 @@ class _PhotoUploadScreenState extends State<PhotoUploadScreen> {
   };
 
   Future<void> _pickImage(String position) async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImages[position] = pickedFile;
-      });
-    }
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Sélectionnez la source de l\'image'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Caméra'),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+                    if (pickedFile != null) {
+                      setState(() {
+                        _selectedImages[position] = pickedFile;
+                      });
+                    }
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo),
+                  title: const Text('Galerie'),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+                    if (pickedFile != null) {
+                      setState(() {
+                        _selectedImages[position] = pickedFile;
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _submitPhotos() {
@@ -46,7 +80,7 @@ class _PhotoUploadScreenState extends State<PhotoUploadScreen> {
               borderRadius: BorderRadius.circular(8.0),
             ),
             child: _selectedImages[position]!.path.isEmpty
-                ? Center(
+                ? const Center(
                     child: Icon(Icons.add_a_photo, size: 50, color: Colors.grey),
                   )
                 : ClipRRect(
@@ -64,7 +98,7 @@ class _PhotoUploadScreenState extends State<PhotoUploadScreen> {
               top: 0,
               right: 0,
               child: IconButton(
-                icon: Icon(Icons.close, color: Colors.red),
+                icon: const Icon(Icons.close, color: Colors.red),
                 onPressed: () {
                   setState(() {
                     _selectedImages[position] = XFile('');
@@ -82,7 +116,7 @@ class _PhotoUploadScreenState extends State<PhotoUploadScreen> {
               child: Text(
                 label,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -97,7 +131,7 @@ class _PhotoUploadScreenState extends State<PhotoUploadScreen> {
       appBar: AppBar(
         title: const Text('Ajouter des Photos'),
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Color(0xFF3366FF), Color(0xFF00CCFF)],
               begin: Alignment.topLeft,
@@ -116,36 +150,40 @@ class _PhotoUploadScreenState extends State<PhotoUploadScreen> {
                 end: Alignment.bottomCenter,
               ),
             ),
-          ),Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
+          ),
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 children: [
-                  _buildImageTile('avant', 'Avant'),
-                  _buildImageTile('arriere', 'Arrière'),
-                  _buildImageTile('gauche', 'Gauche'),
-                  _buildImageTile('droit', 'Droit'),
+                  GridView.count(
+                    shrinkWrap: true,
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    children: [
+                      _buildImageTile('avant', 'Avant'),
+                      _buildImageTile('arriere', 'Arrière'),
+                      _buildImageTile('gauche', 'Gauche'),
+                      _buildImageTile('droit', 'Droit'),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _submitPhotos,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      backgroundColor: Colors.blue,
+                      textStyle: const TextStyle(fontSize: 18),
+                    ),
+                    child: const Text('Valider'),
+                  ),
                 ],
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitPhotos,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15), backgroundColor: Colors.blue,
-                  textStyle: const TextStyle(fontSize: 18),
-                ),
-                child: const Text('Valider'),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
-     ],),);
+    );
   }
 }

@@ -30,6 +30,10 @@ dependencies:
   animated_bottom_navigation_bar: ^1.3.3
   auto_size_text: ^3.0.0
   circular_reveal_animation: ^2.0.1
+  flutter_cube: ^0.1.1
+  
+ 
+  
   
   
   
@@ -47,4 +51,17 @@ flutter:
     - assets/google_logo.png
     - assets/facebook_logo.png
     - assets/logoa.png
+    - assets/vehicle.obj
+    - assets/disc.jpg
+    - assets/caliper.jpg
+    - assets/suspension.tga.jpg
+    - assets/tread.tga.jpg
+    - assets/jcw_glass.jpg
+    - assets/jcw_lights.jpg
+    - assets/jcw_wheel.jpg
+    - assets/jcw_cabin.jpg
+    - assets/jcw_main.jpg
+
+    - assets/NGMD9KMV7CA4PLG6K7QP1N8VS.mtl
+    - assets/vehicle_texture.png
     
